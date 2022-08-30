@@ -1,0 +1,94 @@
+-- find country code via country name
+select country_code from total_population
+where country_name = 'United States'
+
+-- find country total population, total armed forces, and percentage of the population in the armed forces
+select
+total_population.country_name,
+total_population.year_2019 as Population_2019,
+military_total_personnel.year_2019 as Total_Military_2019,
+round(military_total_personnel.year_2019 / total_population.year_2019, 5) * 100 || '%'
+as Percent_Military_2019
+from total_population join military_total_personnel 
+on total_population.country_code = military_total_personnel.country_code
+where total_population.country_code = 'USA'
+
+-- find countries with certain parameters and order from highest to lowest based on total population
+select 
+total_population.country_name,
+total_population.year_2019 as Population_2019,
+military_total_personnel.year_2019 as Total_Military_2019,
+round(military_total_personnel.year_2019 / total_population.year_2019, 5) * 100 || '%'
+as Percent_Military_2019
+from total_population join military_total_personnel 
+on total_population.country_code = military_total_personnel.country_code
+where total_population.year_2019 > 100000000 and military_total_personnel.year_2019 > 1000000
+order by abs(total_population.year_2019) desc
+
+-- sort countries by total population high to low
+select country_name, max(year_2019) as Population_2019
+from total_population
+group by country_name, year_2019
+order by abs(year_2019) desc
+
+-- sort countries by total armed forces high to low excluding countries with no military
+select country_name, max(year_2019) as Total_Military_2019
+from military_total_personnel
+group by country_name, year_2019
+having year_2019 is not null
+order by abs(year_2019) desc
+
+-- find country total population and total gdp with country code
+select 
+total_population.country_name, 
+total_population.year_2019 as Population_2019,
+total_gdp.year_2019 as GDP_2019
+from total_population join total_gdp
+on total_population.country_code = total_gdp.country_code
+where total_population.country_code = 'USA'
+
+-- find country with highest population (did not work without abs function)
+select country_name, year_2019
+from total_population
+where year_2019 = (select(max(abs(year_2019))) from total_population)
+
+-- find country military expenditure and total gdp by usd and gdp% by country code
+select 
+military_expenditure_usd.country_name, 
+military_expenditure_usd.year_2019 as Military_Expense_2019,
+total_gdp.year_2019 as GDP_2019,
+round(military_expenditure_gdp.year_2019, 2)
+as GDP_Percent_Military_2019
+from military_expenditure_usd join military_expenditure_gdp
+on military_expenditure_usd.country_code = military_expenditure_gdp.country_code
+join total_gdp on military_expenditure_gdp.country_code = total_gdp.country_code 
+where military_expenditure_usd.country_code = 'USA'
+
+-- find country military expenditure by usd and gdp% by country code for years 1990, 1999 - 2002, 2019 by country_code
+select 
+military_expenditure_usd.country_name, 
+military_expenditure_usd.year_1990 as Mil_Exp_1990,
+military_expenditure_usd.year_1999 as Mil_Exp_1999,
+military_expenditure_usd.year_2000 as Mil_Exp_2000,
+military_expenditure_usd.year_2001 as Mil_Exp_2001,
+military_expenditure_usd.year_2002 as Mil_Exp_2002,
+military_expenditure_usd.year_2019 as Mil_Exp_2019,
+round(military_expenditure_gdp.year_1990, 2) as GDP_Per_1990,
+round(military_expenditure_gdp.year_1999, 2) as GDP_Per_1999,
+round(military_expenditure_gdp.year_2000, 2) as GDP_Per_2000,
+round(military_expenditure_gdp.year_2001, 2) as GDP_Per_2001,
+round(military_expenditure_gdp.year_2002, 2) as GDP_Per_2002,
+round(military_expenditure_gdp.year_2019, 2) as GDP_Per_2019
+from military_expenditure_usd join military_expenditure_gdp
+on military_expenditure_usd.country_code = military_expenditure_gdp.country_code
+where military_expenditure_usd.country_code = 'USA'
+
+-- total military expenditure in usd from 2001 - 2019
+select
+country_name,
+Year_2001+Year_2002+Year_2003+Year_2004+Year_2005+Year_2006+Year_2007+Year_2008+
+Year_2009+Year_2010+Year_2011+Year_2012+Year_2013+Year_2014+Year_2015+Year_2016+
+Year_2017+Year_2018+Year_2019
+as Mil_Exp_2001_2019
+from military_expenditure_usd
+where country_code = 'USA' or country_code = 'CHN' or country_code = 'RUS'
